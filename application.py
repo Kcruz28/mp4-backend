@@ -82,7 +82,8 @@ def get_db_connection():
             host=os.environ.get("DB_HOST"),
             user=os.environ.get("DB_USER"),
             password=os.environ.get("DB_PASSWORD"),
-            db=os.environ.get("DB_NAME")
+            db=os.environ.get("DB_NAME"),
+            cursorclass=pymysql.cursors.DictCursor ##added
         )
         return connection
     except OperationalError as e:
@@ -136,7 +137,7 @@ def insert_data_into_db(payload):
         connection.close()
     except Exception as e:
         logging.exception("Insert failed")
-        raise e 
+        raise e
     
     raise NotImplementedError("Database insert function not implemented.")
 
@@ -150,18 +151,16 @@ def fetch_data_from_db():
     try:
         connection = get_db_connection()
         with connection.cursor() as cursor:
-            # Order by date ASC per instructions
             sql = "SELECT title, description, image_url, date, location FROM events ORDER BY date ASC"
             cursor.execute(sql)
             events = cursor.fetchall()
             
             for event in events:
                 if event['date']:
-                    # Format: Mon, 01 Aug 2026 00:00:00 GMT
                     event['date'] = event['date'].strftime('%a, %d %b %Y 00:00:00 GMT')
             
             connection.close()
-            return events # Returns the raw list [{}, {}]
+            return events 
     except Exception as e:
         logging.exception("Fetch failed")
         return []
