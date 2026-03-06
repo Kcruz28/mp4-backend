@@ -139,7 +139,7 @@ def insert_data_into_db(payload):
         logging.exception("Insert failed")
         raise e
     
-    raise NotImplementedError("Database insert function not implemented.")
+    # raise NotImplementedError("Database insert function not implemented.")
 
 #Database Function Stub
 def fetch_data_from_db():
@@ -165,7 +165,7 @@ def fetch_data_from_db():
         logging.exception("Fetch failed")
         return []
 
-    raise NotImplementedError("Database fetch function not implemented.")
+    # raise NotImplementedError("Database fetch function not implemented.")
 
 if __name__ == '__main__':
     application.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
