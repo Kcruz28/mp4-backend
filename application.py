@@ -119,25 +119,24 @@ def insert_data_into_db(payload):
     create_db_table()
     # TODO: Implement the database call    
     try:
-        with get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                insert_sql = """
+        connection = get_db_connection()
+        with connection.cursor() as cursor:
+            sql = """
                 INSERT INTO events (title, description, image_url, date, location)
                 VALUES (%s, %s, %s, %s, %s)
-                """
-                cursor.execute(insert_sql, (
-                    payload.get("title"),
-                    payload.get("description"),
-                    payload.get("image_url"),
-                    payload.get("date"),
-                    payload.get("location")
-                ))
-            connection.commit()
-            logging.info("Event inserted successfully")
-            return {"message": "success"} # Return something useful
-    except Exception as e:        
-        logging.exception("Failed to insert event into the database")
-        raise e #
+            """
+            cursor.execute(sql, (
+                payload.get('title'),
+                payload.get('description'),
+                payload.get('image_url'),
+                payload.get('date'),
+                payload.get('location')
+            ))
+        connection.commit()
+        connection.close()
+    except Exception as e:
+        logging.exception("Insert failed")
+        raise e 
     
     raise NotImplementedError("Database insert function not implemented.")
 
@@ -149,22 +148,22 @@ def fetch_data_from_db():
     """
     # TODO: Implement the database call
     try:
-        with get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                # Requirement: Ascending order of date
-                sql = "SELECT title, description, image_url, date, location FROM events ORDER BY date ASC"
-                cursor.execute(sql)
-                events = cursor.fetchall()
-                
-                # Requirement: Specific Date Format "Mon, 01 Aug 2026 00:00:00 GMT"
-                for event in events:
-                    if event['date']:
-                        # Convert date object to the specific string format
-                        event['date'] = event['date'].strftime('%a, %d %b %Y 00:00:00 GMT')
-                
-                return events
+        connection = get_db_connection()
+        with connection.cursor() as cursor:
+            # Order by date ASC per instructions
+            sql = "SELECT title, description, image_url, date, location FROM events ORDER BY date ASC"
+            cursor.execute(sql)
+            events = cursor.fetchall()
+            
+            for event in events:
+                if event['date']:
+                    # Format: Mon, 01 Aug 2026 00:00:00 GMT
+                    event['date'] = event['date'].strftime('%a, %d %b %Y 00:00:00 GMT')
+            
+            connection.close()
+            return events # Returns the raw list [{}, {}]
     except Exception as e:
-        logging.exception("Failed to fetch events")
+        logging.exception("Fetch failed")
         return []
 
     raise NotImplementedError("Database fetch function not implemented.")
